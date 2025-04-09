@@ -16,47 +16,94 @@ struct OnboardingItem: Identifiable {
 
 /// A view that displays the onboarding screens with pagination
 struct OnboardingScreen: View {
-    // MARK: - Properties
     @State private var currentPage = 0
     @State private var navigateToLogin = false
-
+    
     private let onboardingItems = [
         OnboardingItem(
-            image: "onboarding1",
-            title: "Explore Heritage Sites",
-            description: "Discover Sri Lanka's rich cultural heritage through interactive AR experiences"
+            image: "onboarding1", // Make sure these images exist in Assets.xcassets
+            title: "Explore Heritage",
+            description: "Discover Sri Lanka's ancient wonders with immersive AR experiences."
         ),
         OnboardingItem(
             image: "onboarding2",
-            title: "Discover Wildlife",
-            description: "Encounter native wildlife through realistic 3D models in augmented reality"
+            title: "Wildlife in 3D",
+            description: "Meet native wildlife up close through lifelike 3D models."
         ),
         OnboardingItem(
             image: "onboarding3",
-            title: "Voice Assistant",
-            description: "Use Siri to navigate through historical sites and learn about wildlife"
+            title: "Voice Navigation",
+            description: "Use Siri to guide your journey through culture and nature."
         ),
         OnboardingItem(
             image: "onboarding4",
-            title: "Offline Access",
-            description: "Access saved locations and educational materials even without internet"
+            title: "Offline Mode",
+            description: "Access saved locations even when you're offline."
         )
     ]
     
-    // MARK: - Body
     var body: some View {
         NavigationView {
             ZStack {
-                Color("PrimaryGreen").ignoresSafeArea()
-                
-                VStack {
-                    onboardingPager
+                //Color(.systemBackground).ignoresSafeArea()
+                Color("OnboardingBackground").ignoresSafeArea()
+                VStack(spacing: 0) {
+                    TabView(selection: $currentPage) {
+                        ForEach(0..<onboardingItems.count, id: \.self) { index in
+                            OnboardingPageView(item: onboardingItems[index])
+                                .tag(index)
+                        }
+                    }
+                    .tabViewStyle(PageTabViewStyle(indexDisplayMode: .always))
+                    .animation(.easeInOut, value: currentPage)
+                    .accessibilityElement(children: .contain)
+                    
                     Spacer()
-                    navigationButtons
+                    
+                    HStack {
+                        if currentPage < onboardingItems.count - 1 {
+                            Button("Skip") {
+                                navigateToLogin = true
+                            }
+                            .font(.headline)
+                            .foregroundColor(.gray)
+                            .accessibilityLabel("Skip to login")
+                            
+                            Spacer()
+                            
+                            Button("Next") {
+                                withAnimation {
+                                    currentPage += 1
+                                }
+                            }
+                            .font(.headline)
+                            .padding(.vertical, 12)
+                            .padding(.horizontal, 24)
+                            .background(Color.accentColor)
+                            .foregroundColor(.white)
+                            .cornerRadius(20)
+                            .accessibilityLabel("Next onboarding screen")
+                        } else {
+                            Button(action: {
+                                navigateToLogin = true
+                            }) {
+                                Text("Get Started")
+                                    .font(.headline)
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(Color.accentColor)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(25)
+                            }
+                            .accessibilityLabel("Start exploring")
+                        }
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 30)
                 }
-
+                
                 NavigationLink(
-                    destination: SplashScreen(),
+                    destination: LoginScreen(),
                     isActive: $navigateToLogin,
                     label: { EmptyView() }
                 )
@@ -64,91 +111,44 @@ struct OnboardingScreen: View {
             .navigationBarHidden(true)
         }
     }
-
-    // MARK: - Components
-    private var onboardingPager: some View {
-        TabView(selection: $currentPage) {
-            ForEach(0..<onboardingItems.count) { index in
-                OnboardingPageView(item: onboardingItems[index])
-                    .tag(index)
-            }
-        }
-        .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
-    }
-
-    private var navigationButtons: some View {
-        HStack(spacing: 20) {
-            if currentPage < onboardingItems.count - 1 {
-                Button("Skip") {
-                    navigateToLoginScreen()
-                }
-                .foregroundColor(.gray)
-
-                Spacer()
-
-                Button("Next") {
-                    moveToNextPage()
-                }
-                .foregroundColor(.white)
-                .padding(.horizontal, 24)
-                .padding(.vertical, 12)
-                .background(Color("PrimaryAccent"))
-                .cornerRadius(25)
-            } else {
-                Button(action: navigateToLoginScreen) {
-                    Text("Get Started")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color("PrimaryAccent"))
-                        .cornerRadius(25)
-                }
-            }
-        }
-        .padding(.horizontal, 30)
-        .padding(.bottom, 40)
-    }
-
-    // MARK: - Logic
-    private func moveToNextPage() {
-        withAnimation {
-            currentPage += 1
-        }
-    }
-
-    private func navigateToLoginScreen() {
-        withAnimation {
-            navigateToLogin = true
-        }
-    }
 }
 
-/// A single page in the onboarding sequence
+/// A single onboarding page
 struct OnboardingPageView: View {
     let item: OnboardingItem
-
+    
     var body: some View {
         VStack(spacing: 20) {
             Image(item.image)
                 .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(height: 300)
+                .scaledToFit()
+                .frame(height: 280)
                 .padding()
-
+                .accessibilityHidden(true) // alt text could be added here if needed
+            
             Text(item.title)
                 .font(.title)
                 .fontWeight(.bold)
-                .foregroundColor(.white)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
-
+                .accessibilityAddTraits(.isHeader)
+            
             Text(item.description)
                 .font(.body)
-                .foregroundColor(.white.opacity(0.8))
                 .multilineTextAlignment(.center)
+                .foregroundColor(.secondary)
                 .padding(.horizontal, 40)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+
+struct LoginScreen: View {
+    var body: some View {
+        Text("Login Screen")
+            .font(.largeTitle)
+            .navigationBarTitle("Login", displayMode: .inline)
     }
 }
 
@@ -156,6 +156,5 @@ struct OnboardingPageView: View {
 struct OnboardingScreen_Previews: PreviewProvider {
     static var previews: some View {
         OnboardingScreen()
-           
     }
 }
