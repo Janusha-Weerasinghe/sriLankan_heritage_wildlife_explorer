@@ -69,7 +69,7 @@ struct HomeScreen: View {
     /// Header with user profile and notification button
     private var headerView: some View {
         HStack {
-            NavigationLink(destination: UserProfileScreen()) {
+            NavigationLink(destination: UserProfileView()) {
                 Image("UserAvatar")
                     .resizable()
                     .aspectRatio(contentMode: .fill)
@@ -281,7 +281,7 @@ struct NearbyCard: View {
     var body: some View {
         NavigationLink(destination:
             item.type == .heritage ?
-                SiteDetailScreen(siteId: item.id) :
+                HeritageSiteDetailView(siteId: item.id) :
                 WildlifeDetailScreen(wildlifeId: item.id)
         ) {
             ZStack(alignment: .bottomLeading) {
@@ -322,7 +322,7 @@ struct FeaturedCard: View {
     var body: some View {
         NavigationLink(destination:
             item.type == .heritage ?
-                SiteDetailScreen(siteId: item.id) :
+                HeritageSiteDetailView(siteId: item.id) :
                 WildlifeDetailScreen(wildlifeId: item.id)
         ) {
             VStack(alignment: .leading) {

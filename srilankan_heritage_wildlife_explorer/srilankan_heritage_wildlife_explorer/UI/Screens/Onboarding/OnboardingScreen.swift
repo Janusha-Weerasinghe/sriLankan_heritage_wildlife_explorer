@@ -144,13 +144,13 @@ struct OnboardingPageView: View {
 }
 
 
-struct LoginScreen: View {
-    var body: some View {
-        Text("Login Screen")
-            .font(.largeTitle)
-            .navigationBarTitle("Login", displayMode: .inline)
-    }
-}
+//struct LoginScreen: View {
+//    var body: some View {
+//        Text("Login Screen")
+//            .font(.largeTitle)
+//            .navigationBarTitle("Login", displayMode: .inline)
+//    }
+//}
 
 // MARK: - Preview
 struct OnboardingScreen_Previews: PreviewProvider {
