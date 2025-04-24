@@ -1,8 +1,8 @@
 //
 //  ContentView.swift
-//  srilankan_heritage_wildlife_explorer
+//  test
 //
-//  Created by Janusha 023 on 2025-04-09.
+//  Created by janusha on 2025-04-23.
 //
 
 import SwiftUI
@@ -20,5 +20,5 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    SplashView()
 }
