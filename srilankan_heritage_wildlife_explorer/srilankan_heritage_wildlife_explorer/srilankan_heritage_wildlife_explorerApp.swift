@@ -35,7 +35,7 @@ struct srilankan_heritage_wildlife_explorer: App {
   var body: some Scene {
     WindowGroup {
       NavigationView {
-          SplashView()
+          FavoritesView()
       }
     }
   }

@@ -317,27 +317,11 @@ import FirebaseFirestore
 
 class AuthManager: ObservableObject {
     static let shared = AuthManager()
-    //var isAuthenticated :Bool = false
     
-
     @Published var currentUser: User?
+    @Published var isAuthenticated: Bool = false // Add this
 
     init() {}
-
-//    func login(email: String, password: String, completion: @escaping (Result<User, Error>) -> Void) {
-//        // Simulated delay
-//        DispatchQueue.global().asyncAfter(deadline: .now() + 1.0) {
-//            if email == "demo@user.com" && password == "password" {
-//                let user = User(id: UUID(), email: email)
-//                DispatchQueue.main.async {
-//                    self.currentUser = user
-//                    completion(.success(user))
-//                }
-//            } else {
-//                completion(.failure(AuthError.invalidCredentials))
-//            }
-//        }
-//    }
 
     func login(email: String, password: String, completion: @escaping (Result<Void, Error>) -> Void) {
         Auth.auth().signIn(withEmail: email, password: password) { [weak self] authResult, error in
@@ -345,19 +329,18 @@ class AuthManager: ObservableObject {
                 completion(.failure(error))
                 return
             }
-            
+
             guard let user = authResult?.user else {
                 completion(.failure(NSError(domain: "FirebaseAuth", code: -1, userInfo: [NSLocalizedDescriptionKey: "User not found"])))
                 return
             }
-            
+
             self?.fetchUserData(uid: user.uid) { result in
                 switch result {
                 case .success(let userData):
                     DispatchQueue.main.async {
                         self?.currentUser = userData
                         self?.isAuthenticated = true
-                        self?.authState = .authenticated
                         completion(.success(()))
                     }
                 case .failure(let error):
@@ -366,6 +349,7 @@ class AuthManager: ObservableObject {
             }
         }
     }
+
     func fetchUserData(uid: String, completion: @escaping (Result<User, Error>) -> Void) {
         let db = Firestore.firestore()
         db.collection("users").document(uid).getDocument { snapshot, error in
@@ -379,13 +363,11 @@ class AuthManager: ObservableObject {
                 return
             }
             
-            let user = User(uid: uid, data: data)
+            let user = User(id: uid, email: data["email"] as? String ?? "")
             completion(.success(user))
         }
     }
 
-    
-    
     func authenticateWithBiometrics(completion: @escaping (Bool, String?) -> Void) {
         let context = LAContext()
         var error: NSError?
@@ -414,3 +396,21 @@ class AuthManager: ObservableObject {
         }
     }
 }
+
+
+//    func login(email: String, password: String, completion: @escaping (Result<User, Error>) -> Void) {
+//        // Simulated delay
+//        DispatchQueue.global().asyncAfter(deadline: .now() + 1.0) {
+//            if email == "demo@user.com" && password == "password" {
+//                let user = User(id: UUID(), email: email)
+//                DispatchQueue.main.async {
+//                    self.currentUser = user
+//                    completion(.success(user))
+//                }
+//            } else {
+//                completion(.failure(AuthError.invalidCredentials))
+//            }
+//        }
+//    }
+
+ 

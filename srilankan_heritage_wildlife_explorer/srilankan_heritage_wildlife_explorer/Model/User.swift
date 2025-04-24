@@ -7,8 +7,12 @@
 
 import Foundation
 
+//struct User: Identifiable, Codable {
+//    let id: UUID
+//    var email: String
+//    //var password : String
+//}
 struct User: Identifiable, Codable {
-    let id: UUID
+    let id: String  // Change this to String to match the Firebase UID
     var email: String
-    //var password : String
 }

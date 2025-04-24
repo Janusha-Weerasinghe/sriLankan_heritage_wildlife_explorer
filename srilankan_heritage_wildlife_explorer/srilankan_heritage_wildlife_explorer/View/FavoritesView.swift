@@ -103,3 +103,45 @@ struct EmptyFavoritesView: View {
         .background(Color(UIColor.systemGroupedBackground))
     }
 }
+// MARK: - Preview
+struct FavoritesView_Previews: PreviewProvider {
+    static var previews: some View {
+        let mockViewModel = HeritageViewModel()
+
+        mockViewModel.heritageItems = [
+            HeritageItem(
+                id: "1",
+                name: "Ancient Temple",
+                description: "An old and beautiful temple located in the hills.",
+                shortDescription: "A sacred heritage site.",
+                imageURL: "https://example.com/image.jpg",
+                arAvailable: true,
+                arModelName: "temple_model.usdz",
+                location: LocationCoordinate(latitude: 7.8731, longitude: 80.7718),
+                category: .heritage
+            )
+        ]
+
+        mockViewModel.wildlifeItems = [
+            WildlifeItem(
+                id: "2",
+                name: "Sri Lankan Leopard",
+                scientificName: "Panthera pardus kotiya",
+                description: "A rare and elusive leopard found in Sri Lanka.",
+                shortDescription: "Endemic big cat species.",
+                imageURL: "https://example.com/leopard.jpg",
+                arAvailable: false,
+                arModelName: nil,
+                status: .endangered,
+                population: "Less than 1000",
+                habitat: "Forests",
+                commonLocations: ["Yala National Park", "Wilpattu"]
+            )
+        ]
+
+        return FavoritesView()
+            .environmentObject(mockViewModel)
+    }
+}
+
+
