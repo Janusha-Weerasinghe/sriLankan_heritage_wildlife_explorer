@@ -61,3 +61,8 @@ struct HeritageExplorationView: View {
     }
 }
 
+struct HeritageExplorationView_Previews: PreviewProvider {
+    static var previews: some View {
+        HeritageExplorationView()
+    }
+}
