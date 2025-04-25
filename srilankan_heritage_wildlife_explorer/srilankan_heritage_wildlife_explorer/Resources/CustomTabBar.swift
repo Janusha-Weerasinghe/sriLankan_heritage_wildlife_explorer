@@ -16,12 +16,12 @@ struct CustomTabBar: View {
                 selectedTab = 0
             }
 
-            TabBarButton(title: "Heritage", icon: "building.columns", isSelected: selectedTab == 1) {
+            TabBarButton(title: "Map", icon: "map.fill", isSelected: selectedTab == 1) {
                 selectedTab = 1
             }
 
 
-            TabBarButton(title: "Wildlife", icon: "pawprint", isSelected: selectedTab == 2) {
+            TabBarButton(title: "Favourites", icon: "heart.fill", isSelected: selectedTab == 2) {
                 selectedTab = 2
             }
 
