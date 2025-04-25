@@ -1,518 +1,388 @@
-//
-//  HomeScreen.swift
-//  srilankan_heritage_wildlife_explorer
-//
-//  Created by Janusha 023 on 2025-04-09.
-//
-
-
 import SwiftUI
+import MapKit
 
-/// Main home screen of the application that provides access to primary features
-struct HomeView: View {
-    // MARK: - Properties
-    
-    /// Environment objects
-    @EnvironmentObject var authManager: AuthManager
-    @EnvironmentObject var locationManager: LocationManager
-    
-    /// State variables
-    @State private var selectedTab = 0
-    @State private var showNotifications = false
-    @State private var searchQuery = ""
-    @State private var isSearching = false
-    
+// MARK: - Models
 
+/// Model representing items on home screen (heritage sites and wildlife)
+struct ExplorerItem: Identifiable {
+    let id = UUID()
+    let name: String
+    let type: ItemType
+    let image: String
+    let shortDescription: String
+    let isPopular: Bool
+    let location: CLLocationCoordinate2D
     
-    /// Featured exploration options
-    private let featuredItems = [
-        ExplorationItem(id: "1", title: "Sigiriya Rock", image: "sigiriya", type: .heritage),
-        ExplorationItem(id: "2", title: "Yala Safari", image: "yala", type: .wildlife),
-        ExplorationItem(id: "3", title: "Polonnaruwa", image: "polonnaruwa", type: .heritage),
-        ExplorationItem(id: "4", title: "Sri Lankan Elephants", image: "elephant", type: .wildlife)
-    ]
+    enum ItemType: String {
+        case heritageSite = "Heritage Site"
+        case wildlife = "Wildlife"
+        
+        var icon: String {
+            switch self {
+            case .heritageSite: return "building.columns.fill"
+            case .wildlife: return "leaf.fill"
+            }
+        }
+        
+        var color: Color {
+            switch self {
+            case .heritageSite: return .orange
+            case .wildlife: return .green
+            }
+        }
+    }
+}
+
+// MARK: - View Components
+
+struct HomeComponents {
     
-    // MARK: - Body
-    
-    var body: some View {
-        NavigationView {
-            ZStack {
-                Color("BackgroundColor").ignoresSafeArea()
-                
-                VStack(spacing: 0) {
-                    headerView
-                    
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 20) {
-                            welcomeSection
-                            //searchBar
-                            nearbyExplorationSection
-                            featuredExplorationSection
-                            popularCategoriesSection
+    struct CategoryScroll: View {
+        @Binding var selectedCategory: String
+        let categories = ["All", "Heritage", "Wildlife", "Popular", "Nearby"]
+        
+        var body: some View {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    ForEach(categories, id: \.self) { category in
+                        Button(action: {
+                            withAnimation {
+                                selectedCategory = category
+                            }
+                        }) {
+                            Text(category)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .fill(selectedCategory == category ?
+                                              Color.accentColor : Color(UIColor.secondarySystemBackground))
+                                )
+                                .foregroundColor(selectedCategory == category ? .white : .primary)
                         }
-                        .padding(.horizontal)
+                        .buttonStyle(PlainButtonStyle())
                     }
+                }
+                .padding(.horizontal)
+            }
+        }
+    }
+    
+    struct FeaturedCard: View {
+        let item: ExplorerItem
+        let action: () -> Void
+        
+        var body: some View {
+            Button(action: action) {
+                ZStack(alignment: .bottomLeading) {
+                    Image(item.image)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(height: 220)
+                        .clipped()
+                        .cornerRadius(12)
                     
-                    //customTabBar
-                    // Reusable Tab Bar
-                CustomTabBar(selectedTab:$selectedTab)
+                    LinearGradient(
+                        gradient: Gradient(colors: [.clear, .black.opacity(0.8)]),
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .cornerRadius(12)
                     
-//                    SearchBar (searchQuery: <#T##Binding<String>#>, isSearching: <#T##Binding<Bool>#>)
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack {
+                            Image(systemName: item.type.icon)
+                            Text(item.type.rawValue)
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                        }
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(item.type.color.opacity(0.8))
+                        .foregroundColor(.white)
+                        .cornerRadius(12)
+                        
+                        Text(item.name)
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                        
+                        Text(item.shortDescription)
+                            .font(.subheadline)
+                            .foregroundColor(.white.opacity(0.9))
+                            .lineLimit(2)
+                    }
+                    .padding()
                 }
             }
-//            .navigationBarHidden(true)
-//            .sheet(isPresented: $showNotifications) {
-//                NotificationCenterScreen()
-//            }
-            .navigationBarHidden(true)
-            .sheet(isPresented: $showNotifications) {
-                Text("🔔 Notification Center (Mock)")
-                    .font(.title)
-                    .padding()
-            }
-//            .sheet(isPresented: $isSearching) {
-//                SearchResultsScreen(searchQuery: searchQuery)
-//            }
-//            .sheet(isPresented: $isSearching) {
-//                            SearchResultsScreen(searchQuery: searchQuery)
-                      }
+            .buttonStyle(PlainButtonStyle())
+            .shadow(radius: 4)
         }
     }
     
-    // MARK: - UI Components
-    
-    /// Header with user profile and notification button
-    private var headerView: some View {
-        HStack {
-//            NavigationLink(destination: UserProfileView()) {
-//                Image("UserAvatar")
-//                    .resizable()
-//                    .aspectRatio(contentMode: .fill)
-//                    .frame(width: 40, height: 40)
-//                    .clipShape(Circle())
-//            }
-            
-                        NavigationLink(destination: Text("🏠 Profile Screen")) {
-                            Image("UserAvatar")
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(width: 40, height: 40)
-                                .clipShape(Circle())
+    struct ItemCard: View {
+        let item: ExplorerItem
+        let action: () -> Void
+        
+        var body: some View {
+            Button(action: action) {
+                HStack(spacing: 12) {
+                    Image(item.image)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 80, height: 80)
+                        .cornerRadius(8)
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            Image(systemName: item.type.icon)
+                                .font(.caption)
+                            Text(item.type.rawValue)
+                                .font(.caption)
+                                .fontWeight(.medium)
                         }
-            
-            
-            Spacer()
-            
-            Text("AR Explorer")
-                .font(.title2)
-                .fontWeight(.bold)
-            
-            Spacer()
-            
-            //comment because  errors
-            
-//            Button(action: { showNotifications = true }) {
-//                ZStack {
-//                    Image(systemName: "bell.fill")
-//                        .font(.title3)
-//                        .foregroundColor(.primary)
-//
-//                    // Notification badge
-//                    Circle()
-//                        .fill(Color.red)
-//                        .frame(width: 10, height: 10)
-//                        .offset(x: 8, y: -8)
-//                }
-//            }
+                        .foregroundColor(item.type.color)
+                        
+                        Text(item.name)
+                            .fontWeight(.semibold)
+                        
+                        Text(item.shortDescription)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .lineLimit(2)
+                    }
+                    
+                    Spacer()
+                    
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(.gray)
+                }
+                .padding()
+                .background(Color(UIColor.secondarySystemBackground))
+                .cornerRadius(12)
+            }
+            .buttonStyle(PlainButtonStyle())
         }
-        .padding(.horizontal)
-        .padding(.top, 10)
-        .padding(.bottom, 5)
     }
     
-    /// Welcome message with user name
-    private var welcomeSection: some View {
-        VStack(alignment: .leading, spacing: 5) {
-            Text("Welcome back, Adam!")
-                .font(.title)
-                .fontWeight(.bold)
-            
-            Text("Discover Sri Lanka's heritage and wildlife")
-                .foregroundColor(.secondary)
-        }
-        .padding(.top, 10)
-    }
-    
-    /// Search bar component
-//    private var searchBar: some View {
-//        HStack {
-//            Image(systemName: "magnifyingglass")
-//                .foregroundColor(.gray)
-//
-//            TextField("Search for places, animals...", text: $searchQuery)
-//                .onSubmit {
-//                    if !searchQuery.isEmpty {
-//                        isSearching = true
-//                    }
-//                }
-//
-//            if !searchQuery.isEmpty {
-//                Button(action: { searchQuery = "" }) {
-//                    Image(systemName: "xmark.circle.fill")
-//                        .foregroundColor(.gray)
-//                }
-//            }
-//        }
-//        .padding()
-//        .background(Color(.systemGray6))
-//        .cornerRadius(12)
-//        .padding(.vertical, 10)
-//    }
-//
-///// Search bar component
-//private var searchBar: some View {
-//    HStack {
-//        Image(systemName: "magnifyingglass")
-//            .foregroundColor(.gray)
-//
-//        TextField("Search for places, animals...", text: $searchQuery)
-//            .onSubmit {
-//                if !searchQuery.isEmpty {
-//                    isSearching = true
-//                }
-//            }
-//
-//        if !searchQuery.isEmpty {
-//            Button(action: { searchQuery = "" }) {
-//                Image(systemName: "xmark.circle.fill")
-//                    .foregroundColor(.gray)
-//            }
-//        }
-//    }
-//    .padding()
-//    .background(Color(.systemGray6))
-//    .cornerRadius(12)
-//    .padding(.vertical, 10)
-//}
-
-    /// Section showing nearby exploration options
-    private var nearbyExplorationSection: some View {
-        VStack(alignment: .leading, spacing: 15) {
+    struct SectionHeader: View {
+        let title: String
+        let showMoreAction: () -> Void
+        
+        var body: some View {
             HStack {
-                Text("Nearby")
-                    .font(.title2)
+                Text(title)
+                    .font(.title3)
                     .fontWeight(.bold)
                 
                 Spacer()
                 
-//                NavigationLink(destination: MapViewScreen()) {
-//                    Text("View Map")
-//                        .font(.subheadline)
-//                        .foregroundColor(Color("PrimaryColor"))
-//                }
-                                NavigationLink(destination: Text("🏠 Map Screen")) {
-                                    Text("View Map")
-                                        .font(.subheadline)
-                                        .foregroundColor(Color("PrimaryColor"))
-                                }
-            }
-            
-//            ScrollView(.horizontal, showsIndicators: false) {
-//                HStack(spacing: 15) {
-//                    ForEach(featuredItems.shuffled().prefix(3)) { item in
-//                        NearbyCard(item: item)
-//                    }
-//                }
-   //         }
-        }
-    }
-    
-    /// Section showing featured exploration options
-    private var featuredExplorationSection: some View {
-        VStack(alignment: .leading, spacing: 15) {
-            Text("Featured Explorations")
-                .font(.title2)
-                .fontWeight(.bold)
-            
-//            ScrollView(.horizontal, showsIndicators: false) {
-//                HStack(spacing: 20) {
-//                    ForEach(featuredItems) { item in
-//                        FeaturedCard(item: item)
-//                    }
-//                }
-//            }
-        }
-        .padding(.top, 5)
-    }
-    
-    /// Section showing popular categories
-    private var popularCategoriesSection: some View {
-        VStack(alignment: .leading, spacing: 15) {
-            Text("Popular Categories")
-                .font(.title2)
-                .fontWeight(.bold)
-            
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 15) {
-                CategoryButton(title: "Heritage Sites", icon: "building.columns.fill", color: .blue) {
-                    // Navigate to Heritage screen
-                }
-                
-                CategoryButton(title: "Wildlife", icon: "leaf.fill", color: .green) {
-                    // Navigate to Wildlife screen
-                }
-                
-                CategoryButton(title: "AR Experiences", icon: "arkit", color: .purple) {
-                    // Navigate to AR screen
-                }
-                
-                CategoryButton(title: "Favorites", icon: "heart.fill", color: .red) {
-                    // Navigate to Favorites screen
+                Button(action: showMoreAction) {
+                    HStack(spacing: 2) {
+                        Text("See All")
+                            .font(.subheadline)
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                    }
+                    .foregroundColor(.accentColor)
                 }
             }
+            .padding(.horizontal)
         }
-        .padding(.vertical, 10)
-    }
-    
-//    /// Custom tab bar at the bottom
-//    private var customTabBar: some View {
-//        HStack {
-//            TabBarButton(title: "Home", icon: "house.fill", isSelected: selectedTab == 0) {
-//                selectedTab = 0
-//            }
-//
-//            TabBarButton(title: "Heritage", icon: "building.columns", isSelected: selectedTab == 1) {
-//                selectedTab = 1
-//            }
-//
-//            // Center AR button
-//            Button(action: { /* Open AR camera */ }) {
-//                ZStack {
-//                    Circle()
-//                        .fill(Color("PrimaryColor"))
-//                        .frame(width: 60, height: 60)
-//                        .shadow(radius: 2)
-//
-//                    Image(systemName: "camera.viewfinder")
-//                        .font(.system(size: 25))
-//                        .foregroundColor(.white)
-//                }
-//            }
-//            .offset(y: -20)
-//
-//            TabBarButton(title: "Wildlife", icon: "pawprint", isSelected: selectedTab == 2) {
-//                selectedTab = 2
-//            }
-//
-//            TabBarButton(title: "Profile", icon: "person.fill", isSelected: selectedTab == 3) {
-//                selectedTab = 3
-//            }
-//        }
-//        .padding(.horizontal)
-//        .padding(.top, 15)
-//        .padding(.bottom, 5)
-//        .background(Color(.systemBackground))
-//        .cornerRadius(25, corners: [.topLeft, .topRight])
-//        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: -2)
-//    }
-    
-
-// MARK: - Supporting UI Components
-
-/// Model for exploration items
-struct ExplorationItem: Identifiable {
-    let id: String
-    let title: String
-    let image: String
-    let type: ExploreType
-    
-    enum ExploreType {
-        case heritage
-        case wildlife
     }
 }
 
-///// Card showing a nearby place
-//struct NearbyCard: View {
-//    let item: ExplorationItem
-//
-//    var body: some View {
-//        NavigationLink(destination:
-//            item.type == .heritage ?
-//                HeritageSiteDetailView(siteId: item.id) :
-//                WildlifeDetailScreen(wildlifeId: item.id)
-//        ) {
-//            ZStack(alignment: .bottomLeading) {
-//                Image(item.image)
-//                    .resizable()
-//                    .aspectRatio(contentMode: .fill)
-//                    .frame(width: 180, height: 120)
-//                    .cornerRadius(15)
-//                    .overlay(
-//                        LinearGradient(
-//                            gradient: Gradient(colors: [Color.clear, Color.black.opacity(0.7)]),
-//                            startPoint: .top,
-//                            endPoint: .bottom
-//                        )
-//                        .cornerRadius(15)
-//                    )
-//
-//                VStack(alignment: .leading) {
-//                    Text(item.title)
-//                        .font(.headline)
-//                        .foregroundColor(.white)
-//
-//                    Text("2.5 km away")
-//                        .font(.subheadline)
-//                        .foregroundColor(.white.opacity(0.8))
-//                }
-//                .padding(.horizontal, 12)
-//                .padding(.vertical, 10)
-//            }
-//        }
-//    }
-//}
-//
-///// Card showing a featured exploration option
-//struct FeaturedCard: View {
-//    let item: ExplorationItem
-//
-//    var body: some View {
-//        NavigationLink(destination:
-//            item.type == .heritage ?
-//                HeritageSiteDetailView(siteId: item.id) :
-//                WildlifeDetailScreen(wildlifeId: item.id)
-//        ) {
-//            VStack(alignment: .leading) {
-//                Image(item.image)
-//                    .resizable()
-//                    .aspectRatio(contentMode: .fill)
-//                    .frame(width: 280, height: 180)
-//                    .cornerRadius(15)
-//
-//                Text(item.title)
-//                    .font(.headline)
-//                    .padding(.top, 5)
-//
-//                Text(item.type == .heritage ? "Historical Site" : "Wildlife")
-//                    .font(.subheadline)
-//                    .foregroundColor(.secondary)
-//            }
-//            .frame(width: 280)
-//        }
-//        .buttonStyle(PlainButtonStyle())
-//    }
-//}
+// MARK: - Home Screen View
 
-/// Button for a category
-struct CategoryButton: View {
-    let title: String
-    let icon: String
-    let color: Color
-    let action: () -> Void
+struct HomeView: View {
+    @State private var selectedCategory = "All"
+    @State private var searchText = ""
+    @State private var isSearching = false
+    @State private var showNotifications = false
+    @State private var selectedItem: ExplorerItem?
+    @State private var showingDetailView = false
+    
+    let featuredItems: [ExplorerItem] = [
+        ExplorerItem(
+            name: "Sigiriya",
+            type: .heritageSite,
+            image: "sigiriya1",
+            shortDescription: "Ancient rock fortress with spectacular frescoes and landscaped gardens",
+            isPopular: true,
+            location: CLLocationCoordinate2D(latitude: 7.9570, longitude: 80.7603)
+        ),
+        ExplorerItem(
+            name: "Sri Lankan Elephant",
+            type: .wildlife,
+            image: "elephant1",
+            shortDescription: "The largest of Asian elephant subspecies found across Sri Lanka",
+            isPopular: true,
+            location: CLLocationCoordinate2D(latitude: 7.8742, longitude: 80.6511)
+        )
+    ]
+    
+    let popularItems: [ExplorerItem] = [
+        ExplorerItem(
+            name: "Polonnaruwa",
+            type: .heritageSite,
+            image: "polonnaruwa1",
+            shortDescription: "Ancient city known for its well-preserved ruins",
+            isPopular: true,
+            location: CLLocationCoordinate2D(latitude: 7.9403, longitude: 81.0188)
+        ),
+        ExplorerItem(
+            name: "Sri Lankan Leopard",
+            type: .wildlife,
+            image: "leopard1",
+            shortDescription: "Endangered big cat native to the forests of Sri Lanka",
+            isPopular: true,
+            location: CLLocationCoordinate2D(latitude: 6.4019, longitude: 81.3180)
+        ),
+        ExplorerItem(
+            name: "Anuradhapura",
+            type: .heritageSite,
+            image: "anuradhapura1",
+            shortDescription: "Sacred ancient city with dagobas and sacred trees",
+            isPopular: true,
+            location: CLLocationCoordinate2D(latitude: 8.3114, longitude: 80.4037)
+        )
+    ]
     
     var body: some View {
-        Button(action: action) {
-            HStack {
-                Image(systemName: icon)
-                    .font(.title3)
-                    .foregroundColor(color)
-                    .frame(width: 40, height: 40)
-                    .background(color.opacity(0.2))
-                    .cornerRadius(10)
+        NavigationView {
+            ZStack {
+                ScrollView {
+                    VStack(spacing: 24) {
+                        searchBar
+                        
+                        HomeComponents.CategoryScroll(selectedCategory: $selectedCategory)
+                        
+                        VStack(alignment: .leading, spacing: 16) {
+                            HomeComponents.SectionHeader(title: "Featured", showMoreAction: {})
+                            
+                            TabView {
+                                ForEach(featuredItems) { item in
+                                    HomeComponents.FeaturedCard(item: item) {
+                                        selectedItem = item
+                                        showingDetailView = true
+                                    }
+                                    .padding(.horizontal)
+                                }
+                            }
+                            .frame(height: 250)
+                            .tabViewStyle(PageTabViewStyle())
+                        }
+                        
+                        VStack(alignment: .leading, spacing: 16) {
+                            HomeComponents.SectionHeader(title: "Popular Destinations", showMoreAction: {})
+                            
+                            VStack(spacing: 12) {
+                                ForEach(popularItems) { item in
+                                    HomeComponents.ItemCard(item: item) {
+                                        selectedItem = item
+                                        showingDetailView = true
+                                    }
+                                    .padding(.horizontal)
+                                }
+                            }
+                        }
+                        
+//                        VStack(alignment: .leading, spacing: 16) {
+//                            HomeComponents.SectionHeader(title: "Upcoming Events", showMoreAction: {})
+//                            
+//                            Text("No upcoming events")
+//                                .foregroundColor(.secondary)
+//                                .frame(maxWidth: .infinity, alignment: .center)
+//                                .padding()
+//                        }
+                    }
+                    .padding(.vertical)
+                }
                 
-                Text(title)
-                    .font(.headline)
+                NavigationLink(
+                    destination: detailViewForSelectedItem,
+                    isActive: $showingDetailView,
+                    label: { EmptyView() }
+                )
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("AR Explorer")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        showNotifications = true
+                    }) {
+                        Image(systemName: "bell")
+                            .foregroundColor(.primary)
+                    }
+                }
+            }
+        }
+    }
+    
+    private var searchBar: some View {
+        HStack {
+            HStack {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(.gray)
+                
+                TextField("Search places or wildlife", text: $searchText)
                     .foregroundColor(.primary)
                 
-                Spacer()
-                
-                Image(systemName: "chevron.right")
-                    .foregroundColor(.gray)
+                if !searchText.isEmpty {
+                    Button(action: {
+                        searchText = ""
+                    }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.gray)
+                    }
+                }
             }
-            .padding()
-            .background(Color(.systemGray6))
-            .cornerRadius(12)
+            .padding(10)
+            .background(Color(UIColor.systemGray5))
+            .cornerRadius(10)
+            .padding(.horizontal)
+        }
+    }
+    
+    private var detailViewForSelectedItem: some View {
+        Group {
+            if let item = selectedItem {
+                VStack {
+                    Image(item.image)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 250)
+                    
+                    Text(item.name)
+                        .font(.largeTitle)
+                        .bold()
+                        .padding(.top)
+                    
+                    Text(item.shortDescription)
+                        .font(.body)
+                        .padding()
+                    
+                    Spacer()
+                }
+                .navigationTitle(item.name)
+                .navigationBarTitleDisplayMode(.inline)
+            } else {
+                Text("No item selected")
+            }
         }
     }
 }
-
-/// Tab bar button
-//struct TabBarButton: View {
-//    let title: String
-//    let icon: String
-//    let isSelected: Bool
-//    let action: () -> Void
-//
-//    var body: some View {
-//        Button(action: action) {
-//            VStack(spacing: 4) {
-//                Image(systemName: icon)
-//                    .font(.system(size: isSelected ? 22 : 20))
-//                    .foregroundColor(isSelected ? Color("PrimaryColor") : .gray)
-//
-//                Text(title)
-//                    .font(.caption)
-//                    .foregroundColor(isSelected ? Color("PrimaryColor") : .gray)
-//            }
-//            .frame(maxWidth: .infinity)
-//        }
-//    }
-//}
-
-// MARK: - Extensions
-
-extension View {
-    func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
-        clipShape(RoundedCorner(radius: radius, corners: corners))
-    }
-}
-
-struct RoundedCorner: Shape {
-    var radius: CGFloat = .infinity
-    var corners: UIRectCorner = .allCorners
-    
-    func path(in rect: CGRect) -> Path {
-        let path = UIBezierPath(
-            roundedRect: rect,
-            byRoundingCorners: corners,
-            cornerRadii: CGSize(width: radius, height: radius)
-        )
-        return Path(path.cgPath)
-    }
-}
-
 
 // MARK: - Preview
 
-struct HomeScreen_Previews: PreviewProvider {
+struct HomeScreenView_Previews: PreviewProvider {
     static var previews: some View {
         HomeView()
-           
-    }
-}
-struct MainView: View {
-    @State private var selectedTab = 0
-
-    var body: some View {
-        VStack(spacing: 0) {
-            Group {
-                switch selectedTab {
-                case 0:
-                    HomeView()
-//                case 1:
-//                    HeritageView()
-//                case 2:
-//                    WildlifeView()
-                case 3:
-                    ProfileView()
-                default:
-                    HomeView()
-                }
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-            CustomTabBar(selectedTab: $selectedTab)
-        }
-        .edgesIgnoringSafeArea(.bottom)
     }
 }
