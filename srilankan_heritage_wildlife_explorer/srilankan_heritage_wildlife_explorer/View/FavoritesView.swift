@@ -35,10 +35,10 @@ class FavoritesViewModel: ObservableObject {
     /// Load sample data for preview/testing purposes
     private func loadSampleData() {
         favorites = [
-            FavoriteItem(name: "Sigiriya", description: "Ancient rock fortress", imageURL: "sigiriya", category: .heritageSite, dateAdded: Date().addingTimeInterval(-86400), isFeatured: true),
-            FavoriteItem(name: "Polonnaruwa", description: "Medieval capital", imageURL: "polonnaruwa", category: .heritageSite, dateAdded: Date().addingTimeInterval(-172800), isFeatured: false),
-            FavoriteItem(name: "Asian Elephant", description: "Native to Sri Lanka", imageURL: "elephant", category: .wildlife, dateAdded: Date().addingTimeInterval(-259200), isFeatured: true),
-            FavoriteItem(name: "Sri Lankan Leopard", description: "Endangered species", imageURL: "leopard", category: .wildlife, dateAdded: Date().addingTimeInterval(-345600), isFeatured: false)
+            FavoriteItem(name: "Sigiriya", description: "Ancient rock fortress", imageURL: "sigiriya1", category: .heritageSite, dateAdded: Date().addingTimeInterval(-86400), isFeatured: true),
+            FavoriteItem(name: "Polonnaruwa", description: "Medieval capital", imageURL: "polonnaruwa1", category: .heritageSite, dateAdded: Date().addingTimeInterval(-172800), isFeatured: false),
+            FavoriteItem(name: "Asian Elephant", description: "Native to Sri Lanka", imageURL: "elephant1", category: .wildlife, dateAdded: Date().addingTimeInterval(-259200), isFeatured: true),
+            FavoriteItem(name: "Sri Lankan Leopard", description: "Endangered species", imageURL: "leopard1", category: .wildlife, dateAdded: Date().addingTimeInterval(-345600), isFeatured: false)
         ]
     }
     
