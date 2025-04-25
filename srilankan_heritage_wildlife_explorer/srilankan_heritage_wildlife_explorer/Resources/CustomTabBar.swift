@@ -20,21 +20,6 @@ struct CustomTabBar: View {
                 selectedTab = 1
             }
 
-            Button(action: {
-                // TODO: Add AR button action here
-            }) {
-                ZStack {
-                    Circle()
-                        .fill(Color("PrimaryColor"))
-                        .frame(width: 60, height: 60)
-                        .shadow(radius: 2)
-
-                    Image(systemName: "camera.viewfinder")
-                        .font(.system(size: 25))
-                        .foregroundColor(.white)
-                }
-            }
-            .offset(y: -20)
 
             TabBarButton(title: "Wildlife", icon: "pawprint", isSelected: selectedTab == 2) {
                 selectedTab = 2

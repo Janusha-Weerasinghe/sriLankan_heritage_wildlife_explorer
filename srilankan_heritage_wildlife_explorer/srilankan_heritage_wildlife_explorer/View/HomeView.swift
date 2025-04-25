@@ -56,6 +56,7 @@ struct HomeView: View {
                     //customTabBar
                     // Reusable Tab Bar
                 CustomTabBar(selectedTab:$selectedTab)
+                    
 //                    SearchBar (searchQuery: <#T##Binding<String>#>, isSearching: <#T##Binding<Bool>#>)
                 }
             }
@@ -115,7 +116,7 @@ struct HomeView: View {
 //                    Image(systemName: "bell.fill")
 //                        .font(.title3)
 //                        .foregroundColor(.primary)
-//                    
+//
 //                    // Notification badge
 //                    Circle()
 //                        .fill(Color.red)
@@ -333,7 +334,7 @@ struct ExplorationItem: Identifiable {
 ///// Card showing a nearby place
 //struct NearbyCard: View {
 //    let item: ExplorationItem
-//    
+//
 //    var body: some View {
 //        NavigationLink(destination:
 //            item.type == .heritage ?
@@ -354,12 +355,12 @@ struct ExplorationItem: Identifiable {
 //                        )
 //                        .cornerRadius(15)
 //                    )
-//                
+//
 //                VStack(alignment: .leading) {
 //                    Text(item.title)
 //                        .font(.headline)
 //                        .foregroundColor(.white)
-//                    
+//
 //                    Text("2.5 km away")
 //                        .font(.subheadline)
 //                        .foregroundColor(.white.opacity(0.8))
@@ -374,7 +375,7 @@ struct ExplorationItem: Identifiable {
 ///// Card showing a featured exploration option
 //struct FeaturedCard: View {
 //    let item: ExplorationItem
-//    
+//
 //    var body: some View {
 //        NavigationLink(destination:
 //            item.type == .heritage ?
@@ -387,11 +388,11 @@ struct ExplorationItem: Identifiable {
 //                    .aspectRatio(contentMode: .fill)
 //                    .frame(width: 280, height: 180)
 //                    .cornerRadius(15)
-//                
+//
 //                Text(item.title)
 //                    .font(.headline)
 //                    .padding(.top, 5)
-//                
+//
 //                Text(item.type == .heritage ? "Historical Site" : "Wildlife")
 //                    .font(.subheadline)
 //                    .foregroundColor(.secondary)
@@ -480,11 +481,38 @@ struct RoundedCorner: Shape {
     }
 }
 
+
 // MARK: - Preview
 
 struct HomeScreen_Previews: PreviewProvider {
     static var previews: some View {
         HomeView()
            
+    }
+}
+struct MainView: View {
+    @State private var selectedTab = 0
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Group {
+                switch selectedTab {
+                case 0:
+                    HomeView()
+//                case 1:
+//                    HeritageView()
+//                case 2:
+//                    WildlifeView()
+                case 3:
+                    ProfileView()
+                default:
+                    HomeView()
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+            CustomTabBar(selectedTab: $selectedTab)
+        }
+        .edgesIgnoringSafeArea(.bottom)
     }
 }
