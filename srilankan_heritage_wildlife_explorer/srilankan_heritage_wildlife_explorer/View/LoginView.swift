@@ -66,7 +66,7 @@ struct LoginView: View {
                 }
 
                 NavigationLink(
-                    destination: Text("🏠 Home Screen").navigationBarHidden(true),
+                    destination: HomeView().navigationBarHidden(true),
                     isActive: $viewModel.loginSuccess,
                     label: { EmptyView() }
                 )
