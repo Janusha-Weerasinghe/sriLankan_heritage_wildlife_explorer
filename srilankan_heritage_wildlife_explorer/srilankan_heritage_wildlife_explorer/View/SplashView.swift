@@ -49,7 +49,7 @@ appTagline
 
 /// The application logo
 private var appLogo: some View {
-Image("AppLogo")
+Image("Logo")
 .resizable()
 .aspectRatio(contentMode: .fit)
 .frame(width: 150, height: 150)
