@@ -196,8 +196,6 @@ struct HomeComponents {
 
 struct HomeView: View {
     @State private var selectedCategory = "All"
-    @State private var searchText = ""
-    @State private var isSearching = false
     @State private var showNotifications = false
     @State private var selectedItem: ExplorerItem?
     @State private var showingDetailView = false
@@ -237,14 +235,6 @@ struct HomeView: View {
             shortDescription: "Endangered big cat native to the forests of Sri Lanka",
             isPopular: true,
             location: CLLocationCoordinate2D(latitude: 6.4019, longitude: 81.3180)
-        ),
-        ExplorerItem(
-            name: "Anuradhapura",
-            type: .heritageSite,
-            image: "anuradhapura1",
-            shortDescription: "Sacred ancient city with dagobas and sacred trees",
-            isPopular: true,
-            location: CLLocationCoordinate2D(latitude: 8.3114, longitude: 80.4037)
         )
     ]
     
@@ -253,8 +243,6 @@ struct HomeView: View {
             ZStack {
                 ScrollView {
                     VStack(spacing: 24) {
-                        searchBar
-                        
                         HomeComponents.CategoryScroll(selectedCategory: $selectedCategory)
                         
                         VStack(alignment: .leading, spacing: 16) {
@@ -286,15 +274,6 @@ struct HomeView: View {
                                 }
                             }
                         }
-                        
-//                        VStack(alignment: .leading, spacing: 16) {
-//                            HomeComponents.SectionHeader(title: "Upcoming Events", showMoreAction: {})
-//                            
-//                            Text("No upcoming events")
-//                                .foregroundColor(.secondary)
-//                                .frame(maxWidth: .infinity, alignment: .center)
-//                                .padding()
-//                        }
                     }
                     .padding(.vertical)
                 }
@@ -322,31 +301,6 @@ struct HomeView: View {
                     }
                 }
             }
-        }
-    }
-    
-    private var searchBar: some View {
-        HStack {
-            HStack {
-                Image(systemName: "magnifyingglass")
-                    .foregroundColor(.gray)
-                
-                TextField("Search places or wildlife", text: $searchText)
-                    .foregroundColor(.primary)
-                
-                if !searchText.isEmpty {
-                    Button(action: {
-                        searchText = ""
-                    }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.gray)
-                    }
-                }
-            }
-            .padding(10)
-            .background(Color(UIColor.systemGray5))
-            .cornerRadius(10)
-            .padding(.horizontal)
         }
     }
     
