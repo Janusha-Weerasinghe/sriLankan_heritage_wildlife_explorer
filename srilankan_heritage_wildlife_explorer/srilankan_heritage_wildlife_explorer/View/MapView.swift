@@ -115,3 +115,9 @@ struct LocationDetailCard: View {
         .shadow(radius: 5)
     }
 }
+
+struct MapView_Previews: PreviewProvider {
+    static var previews: some View {
+        MapView()
+    }
+}
