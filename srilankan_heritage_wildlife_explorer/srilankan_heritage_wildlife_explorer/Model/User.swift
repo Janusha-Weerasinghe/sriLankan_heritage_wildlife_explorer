@@ -13,6 +13,6 @@ import Foundation
 //    //var password : String
 //}
 struct User: Identifiable, Codable {
-    let id: String  // Change this to String to match the Firebase UID
+    let id: String 
     var email: String
 }

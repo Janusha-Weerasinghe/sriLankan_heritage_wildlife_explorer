@@ -21,7 +21,7 @@ struct SplashView: View {
 // MARK: - Body
 var body: some View {
 if isActive {
-// Ensure OnboardingScreen is defined elsewhere in your project
+
     OnboardingView()
 } else {
 splashScreenContent

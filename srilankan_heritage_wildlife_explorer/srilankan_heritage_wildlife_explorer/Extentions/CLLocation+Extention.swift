@@ -11,8 +11,7 @@ extension CLLocation {
         let geocoder = CLGeocoder()
         var result: String?
         
-        // Synchronous approach for simplicity in this example
-        // In a real app, you'd want to use the async version
+      
         let semaphore = DispatchSemaphore(value: 0)
         
         geocoder.reverseGeocodeLocation(self) { placemarks, error in
