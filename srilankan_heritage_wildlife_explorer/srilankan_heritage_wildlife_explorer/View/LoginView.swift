@@ -66,7 +66,7 @@ struct LoginView: View {
                 }
 
                 NavigationLink(
-                    destination: HomeView().navigationBarHidden(true),
+                    destination: MainView().navigationBarHidden(true),
                     isActive: $viewModel.loginSuccess,
                     label: { EmptyView() }
                 )
@@ -263,4 +263,3 @@ struct LoginView_Previews: PreviewProvider {
             .environmentObject(AuthManager())
     }
 }
-

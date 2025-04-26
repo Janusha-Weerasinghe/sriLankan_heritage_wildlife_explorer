@@ -1,3 +1,10 @@
+////
+////  FaceID.swift
+////  srilankan_heritage_wildlife_explorer
+////
+////  Created by janusha on 2025-04-26.
+////
+//
 //import Foundation
 //import LocalAuthentication
 //import SwiftUI
@@ -27,57 +34,57 @@
 //    @Published var showDashboard: Bool = false
 //    @Published var errorMessage: String? = nil
 //    @Published var currentUser: User? = nil
-//    
+//
 //    // MARK: - Login Actions
-//    
+//
 //    func login() {
 //        guard let url = URL(string: "http://localhost:3000/login") else {
 //            self.errorMessage = "Invalid login URL"
 //            return
 //        }
-//        
+//
 //        let loginPayload = ["username": username, "password": password]
 //        guard let body = try? JSONSerialization.data(withJSONObject: loginPayload) else {
 //            self.errorMessage = "Failed to encode login data"
 //            return
 //        }
-//        
+//
 //        var request = URLRequest(url: url)
 //        request.httpMethod = "POST"
 //        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 //        request.httpBody = body
-//        
+//
 //        URLSession.shared.dataTask(with: request) { data, response, error in
 //            DispatchQueue.main.async {
 //                if let error = error {
 //                    self.errorMessage = "Network error: \(error.localizedDescription)"
 //                    return
 //                }
-//                
+//
 //                guard let httpResponse = response as? HTTPURLResponse else {
 //                    self.errorMessage = "Invalid response from server"
 //                    return
 //                }
-//                
+//
 //                guard let data = data else {
 //                    self.errorMessage = "No data received from server"
 //                    return
 //                }
-//                
+//
 //                if httpResponse.statusCode == 200 {
 //                    do {
 //                        let decoder = JSONDecoder()
 //                        let loginResponse = try decoder.decode(LoginResponse.self, from: data)
-//                        
+//
 //                        // Store the user details
 //                        self.currentUser = loginResponse.user
 //                        self.errorMessage = nil
 //                        self.isAuthenticated = true
 //                        self.showDashboard = true
-//                        
+//
 //                        // You could also save user details to UserDefaults here if needed
 //                        // self.saveUserToUserDefaults(user: loginResponse.user)
-//                        
+//
 //                    } catch {
 //                        self.errorMessage = "Failed to parse server response: \(error.localizedDescription)"
 //                    }
@@ -97,21 +104,21 @@
 //            }
 //        }.resume()
 //    }
-//    
+//
 //    func loginWithApple() {
 //        print("Apple login")
 //        self.showDashboard = true
 //    }
-//    
+//
 //    func loginWithGoogle() {
 //        print("Google login")
 //        self.showDashboard = true
 //    }
-//    
+//
 //    func authenticateWithFaceID() {
 //        let context = LAContext()
 //        var error: NSError?
-//        
+//
 //        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
 //            let reason = "Log in using Face ID"
 //            context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, authError in
@@ -129,7 +136,7 @@
 //            print("⚠️ Face ID not available: \(error?.localizedDescription ?? "Unknown error")")
 //        }
 //    }
-//    
+//
 //    // Optional: Save user to UserDefaults for persistence
 //    private func saveUserToUserDefaults(user: User) {
 //        if let encoded = try? JSONEncoder().encode(user) {
@@ -137,4 +144,4 @@
 //        }
 //    }
 //}
-//
+
